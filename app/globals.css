@@ -1,0 +1,145 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 50% -20%, rgba(0, 177, 231, 0.2), transparent 42rem),
+    #002d72;
+  color: #f8fafc;
+  font-family: "Inter", sans-serif;
+}
+.font-display { font-family: "Outfit", sans-serif; }
+::selection { background: #00b1e7; color: #002d72; }
+
+@layer components {
+  .public-theme .bg-panel {
+    background: #ffffff;
+    border-color: #e2e8f0;
+    color: #1a1a1a;
+  }
+  .public-theme > header:not(:first-child) .text-white,
+  .public-theme > article .text-white {
+    color: #002d72 !important;
+  }
+  .public-theme .bg-ink {
+    background: #2f80b7;
+    color: #ffffff;
+  }
+  .public-theme .page-heading,
+  .admin-theme .page-heading {
+    color: #ffffff !important;
+  }
+  .public-theme input,
+  .public-theme select {
+    background: #ffffff;
+    border-color: #e2e8f0;
+    color: #1a1a1a;
+  }
+  .public-theme input::placeholder {
+    color: #6b7280;
+  }
+  .public-theme .border-white\/10,
+  .public-theme .border-white\/15 {
+    border-color: #e2e8f0 !important;
+  }
+  .public-theme .text-white\/40,
+  .public-theme .text-white\/45,
+  .public-theme .text-white\/50,
+  .public-theme .text-white\/55,
+  .public-theme .text-white\/60,
+  .public-theme .text-white\/70 {
+    color: #6b7280 !important;
+  }
+  .public-theme .text-white {
+    color: #1a1a1a;
+  }
+  .public-theme > header:first-child .text-white,
+  .public-theme > header:first-child .text-white\/45,
+  .public-theme > header:first-child .text-white\/55,
+  .public-theme > header:first-child .text-white\/65,
+  .public-theme > header:first-child .text-white\/70 {
+    color: #ffffff !important;
+  }
+  .public-theme .bg-panel .text-white {
+    color: #002d72 !important;
+  }
+  .public-theme .bg-panel [class*="text-white/"] {
+    color: #6b7280 !important;
+  }
+  .public-theme .bg-panel .text-electric {
+    color: #f59e0b !important;
+  }
+  .public-theme .bg-panel .bg-electric {
+    background: #f59e0b !important;
+    color: #002d72 !important;
+  }
+  .public-theme .bg-electric {
+    background: #f59e0b !important;
+    color: #002d72 !important;
+  }
+  .public-theme .text-electric {
+    color: #f59e0b !important;
+  }
+  .public-theme .bg-panel .border-white\/10,
+  .public-theme .bg-panel .border-white\/5 {
+    border-color: #e2e8f0 !important;
+  }
+  .admin-theme {
+    background: #2f80b7 !important;
+  }
+  .admin-theme .bg-ink {
+    background: #2f80b7 !important;
+  }
+  .admin-theme .bg-panel {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    color: #1a1a1a !important;
+  }
+  .admin-theme .bg-panel .text-white,
+  .admin-theme .bg-panel h1,
+  .admin-theme .bg-panel h2,
+  .admin-theme .bg-panel h3,
+  .admin-theme .bg-panel p {
+    color: #002d72;
+  }
+  .admin-theme .bg-panel [class*="text-white/"] {
+    color: #6b7280 !important;
+  }
+  .admin-theme .bg-panel .text-electric {
+    color: #f59e0b !important;
+  }
+  .admin-theme .bg-panel .bg-electric {
+    background: #f59e0b !important;
+    color: #002d72 !important;
+  }
+  .admin-theme .bg-panel input,
+  .admin-theme .bg-panel select,
+  .admin-theme .bg-panel textarea {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    color: #1a1a1a !important;
+  }
+  .admin-theme .bg-panel .bg-ink\/40,
+  .admin-theme .bg-panel .bg-ink\/50,
+  .admin-theme .bg-panel .bg-white\/5,
+  .admin-theme .bg-panel .bg-white\/10 {
+    background: #f8fafc !important;
+  }
+  .admin-theme .bg-panel .border-white\/10,
+  .admin-theme .bg-panel .border-white\/15 {
+    border-color: #e2e8f0 !important;
+  }
+  .ucl-live {
+    border-color: rgba(0, 177, 231, 0.55);
+    box-shadow: 0 0 32px rgba(0, 177, 231, 0.18);
+  }
+  .ucl-gold {
+    color: #00b1e7;
+  }
+}
