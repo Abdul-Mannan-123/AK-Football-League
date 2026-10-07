@@ -27,6 +27,7 @@ export default function AdminControlCenter() {
   const [newsId, setNewsId] = useState("");
   const [newsTitle, setNewsTitle] = useState("");
   const [newsContent, setNewsContent] = useState("");
+  const [newsImage, setNewsImage] = useState<File | null>(null);
   const [newSeason, setNewSeason] = useState("");
   const [newTeam, setNewTeam] = useState("");
   const [newTeamCode, setNewTeamCode] = useState("");
@@ -107,10 +108,17 @@ export default function AdminControlCenter() {
     event.preventDefault();
     if (!newsTitle.trim() || !newsContent.trim()) return setNotice({ type: "error", text: "Enter a news title and story." });
     const result = newsId
-      ? await client.from("news").update({ title: newsTitle.trim(), content: newsContent.trim() }).eq("id", newsId)
-      : await client.from("news").insert({ title: newsTitle.trim(), content: newsContent.trim() });
-    setNotice(result.error ? { type: "error", text: result.error.message } : { type: "success", text: newsId ? "News updated." : "News published." });
-    if (!result.error) { setNewsId(""); setNewsTitle(""); setNewsContent(""); }
+      ? await client.from("news").update({ title: newsTitle.trim(), content: newsContent.trim() }).eq("id", newsId).select("id").single()
+      : await client.from("news").insert({ title: newsTitle.trim(), content: newsContent.trim() }).select("id").single();
+    if (result.error || !result.data) return setNotice({ type: "error", text: result.error?.message ?? "Could not save news." });
+    if (newsImage) {
+      const uploadedUrl = await uploadImage("news-images", result.data.id, newsImage);
+      if (!uploadedUrl) return;
+      const { error } = await client.from("news").update({ cover_image_url: uploadedUrl }).eq("id", result.data.id);
+      if (error) return setNotice({ type: "error", text: error.message });
+    }
+    setNotice({ type: "success", text: newsId ? "News updated." : "News published." });
+    setNewsId(""); setNewsTitle(""); setNewsContent(""); setNewsImage(null);
   }
 
   async function createSeason(event: FormEvent) {
@@ -155,7 +163,7 @@ export default function AdminControlCenter() {
     setPlayerName(""); setPlayerNumber(""); setPlayerPhoto(null);
   }
 
-  async function uploadImage(bucket: "team-logos" | "player-photos", id: string, file: File) {
+  async function uploadImage(bucket: "team-logos" | "player-photos" | "news-images", id: string, file: File) {
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       setNotice({ type: "error", text: "Use a JPG, PNG, or WebP image." });
       return null;
@@ -200,7 +208,7 @@ export default function AdminControlCenter() {
       <ControlCard icon={<CalendarClock />} title="Season lifecycle" description="Only competition staff can activate or close a season."><form onSubmit={changeSeason} className="grid gap-3"><Select value={seasonId} onChange={(e) => setSeasonId(e.target.value)}><option value="">Select season</option>{seasons.map((season) => <option key={season.id} value={season.id}>{season.name}</option>)}</Select><Select value={status} onChange={(e) => setStatus(e.target.value)}><option value="draft">Draft</option><option value="active">Active / start season</option><option value="completed">Completed / end season</option><option value="cancelled">Cancelled</option></Select><Button className="bg-electric text-ink"><Check size={16} /> Update season</Button></form></ControlCard>
       <ControlCard icon={<Users />} title="Team discipline" description="Disqualify a team without deleting historical matches."><form onSubmit={disqualifyTeam} className="grid gap-3"><Select value={teamId} onChange={(e) => setTeamId(e.target.value)}><option value="">Select team</option>{teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}</Select><Button className="bg-red-500/80 text-white">Disqualify team</Button></form></ControlCard>
       <ControlCard icon={<CalendarClock />} title="Automatic schedule" description="Create missing round-robin pairings for a season/group."><form onSubmit={generateSchedule} className="grid gap-3"><Select value={seasonId} onChange={(e) => setSeasonId(e.target.value)}><option value="">Select season</option>{seasons.map((season) => <option key={season.id} value={season.id}>{season.name}</option>)}</Select><Input type="text" placeholder="Group UUID (optional)" value={groupId} onChange={(e) => setGroupId(e.target.value)} /><Input type="datetime-local" value={scheduleDate} onChange={(e) => setScheduleDate(e.target.value)} /><Button className="bg-electric text-ink"><CalendarClock size={16} /> Generate schedule</Button></form></ControlCard>
-      <ControlCard icon={<FileText />} title="News desk" description="Create or update stories. RLS still enforces the news coordinator role."><form onSubmit={saveNews} className="grid gap-3"><Input placeholder="Existing news UUID (leave blank to create)" value={newsId} onChange={(e) => setNewsId(e.target.value)} /><Input placeholder="Headline" value={newsTitle} onChange={(e) => setNewsTitle(e.target.value)} /><textarea className="min-h-28 rounded-xl border border-white/10 bg-ink px-3 py-2 text-sm text-white outline-none focus:border-electric" placeholder="Story content" value={newsContent} onChange={(e) => setNewsContent(e.target.value)} /><Button className="bg-electric text-ink"><FileText size={16} /> {newsId ? "Update news" : "Publish news"}</Button></form></ControlCard>
+      <ControlCard icon={<FileText />} title="News desk" description="Create or update stories and upload their cover image. RLS still enforces the news coordinator role."><form onSubmit={saveNews} className="grid gap-3"><Input placeholder="Existing news UUID (leave blank to create)" value={newsId} onChange={(e) => setNewsId(e.target.value)} /><Input placeholder="Headline" value={newsTitle} onChange={(e) => setNewsTitle(e.target.value)} /><textarea className="min-h-28 rounded-xl border border-white/10 bg-ink px-3 py-2 text-sm text-white outline-none focus:border-electric" placeholder="Story content" value={newsContent} onChange={(e) => setNewsContent(e.target.value)} /><label className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white/60"><Upload size={16} className="text-electric" /><span className="min-w-0 flex-1 truncate">{newsImage?.name ?? "Upload cover image (optional)"}</span><input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => setNewsImage(e.target.files?.[0] ?? null)} /></label><Button className="bg-electric text-ink"><FileText size={16} /> {newsId ? "Update news" : "Publish news"}</Button></form></ControlCard>
     </div>
   </section>;
 }

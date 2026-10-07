@@ -10,7 +10,7 @@ export async function getHomepageData() {
     supabase.from("top_scorers_view").select("*").limit(5),
     supabase.from("top_assists_view").select("*").limit(5),
     supabase.from("news").select("*").order("published_at", { ascending: false }).limit(3),
-    supabase.from("matches").select("id,kickoff_time,pitch_location,status,home_score,away_score,home_team_id,away_team_id,match_events(id,event_type,minute,players(name))").in("status", ["scheduled", "live", "halftime", "completed"]).order("kickoff_time", { ascending: false }).limit(50),
+    supabase.from("matches").select("id,kickoff_time,pitch_location,status,home_score,away_score,home_team_id,away_team_id,match_events(id,event_type,minute,players(name))").in("status", ["scheduled", "live", "halftime", "completed"]).order("kickoff_time", { ascending: true }).limit(100),
     supabase.from("players").select("id,name,photo_url,jersey_number,position,teams(name,short_code)").eq("is_active", true).order("name").limit(6),
     supabase.from("player_stats_view").select("player_id,goals,assists"),
     supabase.from("teams").select("id,name,short_code,logo_url").order("name"),
@@ -41,8 +41,8 @@ export async function getHomepageData() {
     } satisfies FeaturedMatch;
   }).filter((match): match is FeaturedMatch => match !== null);
   const featuredMatch = normalizedMatches.find((match) => match.status === "live" || match.status === "halftime")
-    ?? normalizedMatches.filter((match) => match.status === "completed").sort((a, b) => Date.parse(b.kickoff_time) - Date.parse(a.kickoff_time))[0]
     ?? normalizedMatches.filter((match) => match.status === "scheduled").sort((a, b) => Date.parse(a.kickoff_time) - Date.parse(b.kickoff_time))[0]
+    ?? normalizedMatches.filter((match) => match.status === "completed").sort((a, b) => Date.parse(b.kickoff_time) - Date.parse(a.kickoff_time))[0]
     ?? null;
   const statsByPlayer = new Map((playerStats.data ?? []).map((row) => [row.player_id, row]));
   const homepagePlayers = (players.data ?? []).map((player) => {
