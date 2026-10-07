@@ -8,6 +8,7 @@ const links = [
   ["Matches", "/matches"],
   ["Tables", "/leagues"],
   ["Players", "/players"],
+  ["News", "/news"],
   ["Officials", "/referees"],
 ];
 
