@@ -176,7 +176,10 @@ export default function AdminControlCenter() {
     const path = `${id}/${Date.now()}.${extension}`;
     const { error } = await client.storage.from(bucket).upload(path, file, { contentType: file.type, upsert: false });
     if (error) {
-      setNotice({ type: "error", text: error.message });
+      const text = error.message.toLowerCase().includes("bucket not found")
+        ? "Storage is not configured in Supabase. Run supabase/migrations/20261008005000_repair_asset_storage_buckets.sql in the Supabase SQL Editor, then try again."
+        : error.message;
+      setNotice({ type: "error", text });
       return null;
     }
     return client.storage.from(bucket).getPublicUrl(path).data.publicUrl;

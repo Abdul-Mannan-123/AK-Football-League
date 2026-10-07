@@ -85,7 +85,10 @@ export default function TeamWorkspace() {
     const path = `${id}/${Date.now()}.${extension}`;
     const uploadResult = await client.storage.from(bucket).upload(path, file, { contentType: file.type, upsert: false });
     if (uploadResult.error) {
-      setNotice(`Upload failed: ${uploadResult.error.message}`);
+      const message = uploadResult.error.message.toLowerCase().includes("bucket not found")
+        ? "Storage is not configured in Supabase. Run supabase/migrations/20261008005000_repair_asset_storage_buckets.sql in the Supabase SQL Editor, then try again."
+        : `Upload failed: ${uploadResult.error.message}`;
+      setNotice(message);
       return null;
     }
     return client.storage.from(bucket).getPublicUrl(path).data.publicUrl;

@@ -52,7 +52,9 @@ export default function AssetManager() {
     const uploadResult = await client.storage.from(bucket).upload(path, file, { upsert: false, contentType: file.type });
     if (uploadResult.error) {
       setBusy(false);
-      return setMessage(uploadResult.error.message);
+      return setMessage(uploadResult.error.message.toLowerCase().includes("bucket not found")
+        ? "Storage buckets are missing. Run supabase/migrations/20261008005000_repair_asset_storage_buckets.sql in the Supabase SQL Editor."
+        : uploadResult.error.message);
     }
     const { data } = client.storage.from(bucket).getPublicUrl(path);
     const table = type === "team" ? "teams" : type === "player" ? "players" : "referees";
