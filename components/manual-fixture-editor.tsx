@@ -17,7 +17,7 @@ type Fixture = {
   away_team_id: string;
   kickoff_time: string;
   pitch_location: string | null;
-  status: "scheduled" | "live" | "completed";
+  status: "scheduled" | "live" | "halftime" | "completed";
 };
 type FormState = {
   seasonId: string;
@@ -71,7 +71,7 @@ export default function ManualFixtureEditor() {
       supabase.from("seasons").select("id, name").order("name", { ascending: false }),
       supabase.from("groups").select("id, name").order("name"),
       supabase.from("teams").select("id, name").order("name"),
-      supabase.from("matches").select("id, season_id, group_id, home_team_id, away_team_id, kickoff_time, pitch_location, status").eq("status", "scheduled").order("kickoff_time"),
+      supabase.from("matches").select("id, season_id, group_id, home_team_id, away_team_id, kickoff_time, pitch_location, status").in("status", ["scheduled", "live", "halftime", "completed"]).order("kickoff_time"),
     ]);
 
     const firstError = seasonResult.error ?? groupResult.error ?? teamResult.error ?? fixtureResult.error;
@@ -184,14 +184,14 @@ export default function ManualFixtureEditor() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const deleteFixture = async (id: string) => {
-    if (!supabase || !window.confirm("Delete this scheduled fixture?")) return;
-    const { error } = await supabase.from("matches").delete().eq("id", id).eq("status", "scheduled");
+  const deleteFixture = async (fixture: Fixture) => {
+    if (!supabase || !window.confirm(`Delete this ${fixture.status} match? This permanently removes its events, lineups, and player match statistics.`)) return;
+    const { error } = await supabase.from("matches").delete().eq("id", fixture.id);
     if (error) {
       setToast({ type: "error", message: error.message });
     } else {
       setToast({ type: "success", message: "Fixture deleted." });
-      if (editingId === id) {
+      if (editingId === fixture.id) {
         setEditingId(null);
         setForm(emptyForm);
       }
@@ -238,7 +238,7 @@ export default function ManualFixtureEditor() {
 
       <div className="rounded-3xl border border-white/10 bg-panel p-5 sm:p-7">
         <div className="mb-5 flex items-center gap-3"><CalendarDays className="text-electric" size={20} /><div><h2 className="font-display text-xl font-bold">Scheduled fixtures</h2><p className="text-sm text-white/40">{fixtures.length} upcoming fixture{fixtures.length === 1 ? "" : "s"}</p></div></div>
-        {loading ? <p className="py-8 text-sm text-white/45">Loading fixtures...</p> : fixtures.length === 0 ? <p className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-white/40">No scheduled fixtures yet.</p> : <div className="space-y-3">{fixtures.map((fixture) => <div key={fixture.id} className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-[10px] font-black uppercase tracking-widest text-electric">{seasonName(fixture.season_id)} · {groupName(fixture.group_id)}</p><p className="mt-2 font-display font-bold text-white">{teamName(fixture.home_team_id)} <span className="px-2 text-white/25">vs</span> {teamName(fixture.away_team_id)}</p><p className="mt-1 text-xs text-white/45">{new Date(fixture.kickoff_time).toLocaleString()} · {fixture.pitch_location}</p></div><div className="flex shrink-0 gap-2"><Button type="button" onClick={() => startEditing(fixture)} className="gap-2 bg-white/10 text-white hover:bg-white/15"><Pencil size={15} /> Edit</Button><Button type="button" onClick={() => void deleteFixture(fixture.id)} className="gap-2 bg-red-500/10 text-red-200 hover:bg-red-500/20"><Trash2 size={15} /> Delete</Button></div></div>)}</div>}
+        {loading ? <p className="py-8 text-sm text-white/45">Loading fixtures...</p> : fixtures.length === 0 ? <p className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-white/40">No matches yet.</p> : <div className="space-y-3">{fixtures.map((fixture) => <div key={fixture.id} className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-[10px] font-black uppercase tracking-widest text-electric">{seasonName(fixture.season_id)} · {groupName(fixture.group_id)} · {fixture.status}</p><p className="mt-2 font-display font-bold text-white">{teamName(fixture.home_team_id)} <span className="px-2 text-white/25">vs</span> {teamName(fixture.away_team_id)}</p><p className="mt-1 text-xs text-white/45">{new Date(fixture.kickoff_time).toLocaleString()} · {fixture.pitch_location}</p></div><div className="flex shrink-0 gap-2"><Button type="button" onClick={() => startEditing(fixture)} className="gap-2 bg-white/10 text-white hover:bg-white/15"><Pencil size={15} /> Edit</Button><Button type="button" onClick={() => void deleteFixture(fixture)} className="gap-2 bg-red-500/10 text-red-200 hover:bg-red-500/20"><Trash2 size={15} /> Delete</Button></div></div>)}</div>}
       </div>
     </section>
   );
