@@ -10,20 +10,35 @@ export async function getHomepageData() {
     supabase.from("top_scorers_view").select("*").limit(5),
     supabase.from("top_assists_view").select("*").limit(5),
     supabase.from("news").select("*").order("published_at", { ascending: false }).limit(3),
-    supabase.from("matches").select("id,kickoff_time,pitch_location,status,home_score,away_score,home_team_id,away_team_id,match_events(id,event_type,minute,players(name))").in("status", ["scheduled", "live", "halftime", "completed"]).order("kickoff_time", { ascending: true }).limit(100),
-    supabase.from("players").select("id,name,photo_url,jersey_number,position,teams(name,short_code)").eq("is_active", true).order("name").limit(6),
+    supabase.from("matches").select("id,kickoff_time,pitch_location,status,home_score,away_score,home_team_id,away_team_id").in("status", ["scheduled", "live", "halftime", "completed"]).order("kickoff_time", { ascending: true }).limit(100),
+    supabase.from("players").select("id,name,photo_url,jersey_number,position,team_id").eq("is_active", true).order("name").limit(6),
     supabase.from("player_stats_view").select("player_id,goals,assists"),
     supabase.from("teams").select("id,name,short_code,logo_url").order("name"),
     supabase.from("groups").select("id,name"),
   ]);
 
   const teamById = new Map((teams.data ?? []).map((team) => [team.id, team]));
+  const matchIds = (matches.data ?? []).map((match) => match.id);
+  const { data: matchEvents } = matchIds.length
+    ? await supabase.from("match_events").select("id,match_id,event_type,minute,player_id").in("match_id", matchIds)
+    : { data: [] };
+  const eventPlayerIds = (matchEvents ?? []).map((event) => event.player_id).filter(Boolean);
+  const { data: eventPlayers } = eventPlayerIds.length
+    ? await supabase.from("players").select("id,name").in("id", eventPlayerIds)
+    : { data: [] };
+  const eventPlayerById = new Map((eventPlayers ?? []).map((player) => [player.id, player.name]));
+  const eventsByMatch = new Map<string, Array<{ id: string; event_type: string; minute: number; player_name: string }>>();
+  for (const event of matchEvents ?? []) {
+    const current = eventsByMatch.get(event.match_id) ?? [];
+    current.push({ id: event.id, event_type: event.event_type, minute: event.minute, player_name: eventPlayerById.get(event.player_id) ?? "Unknown player" });
+    eventsByMatch.set(event.match_id, current);
+  }
   const normalizedMatches = (matches.data ?? []).map((match) => {
     const value = match as Record<string, unknown>;
     const home = teamById.get(String(value.home_team_id));
     const away = teamById.get(String(value.away_team_id));
     if (!home || !away) return null;
-    const events = Array.isArray(value.match_events) ? value.match_events : [];
+    const events = eventsByMatch.get(String(value.id)) ?? [];
     return {
       id: String(value.id),
       status: value.status as FeaturedMatch["status"],
@@ -33,11 +48,7 @@ export async function getHomepageData() {
       away_score: Number(value.away_score ?? 0),
       home: { name: home.name, short_code: home.short_code, logo_url: home.logo_url },
       away: { name: away.name, short_code: away.short_code, logo_url: away.logo_url },
-      events: events.map((event) => {
-        const item = event as Record<string, unknown>;
-        const player = (Array.isArray(item.players) ? item.players[0] : item.players) as { name?: string } | null;
-        return { id: String(item.id), event_type: String(item.event_type), minute: Number(item.minute), player_name: player?.name ?? "Unknown player" };
-      }),
+      events,
     } satisfies FeaturedMatch;
   }).filter((match): match is FeaturedMatch => match !== null);
   const featuredMatch = normalizedMatches.find((match) => match.status === "live" || match.status === "halftime")
@@ -46,7 +57,7 @@ export async function getHomepageData() {
     ?? null;
   const statsByPlayer = new Map((playerStats.data ?? []).map((row) => [row.player_id, row]));
   const homepagePlayers = (players.data ?? []).map((player) => {
-    const team = Array.isArray(player.teams) ? player.teams[0] : player.teams;
+    const team = teamById.get(player.team_id);
     const stats = statsByPlayer.get(player.id);
     return {
       id: player.id,

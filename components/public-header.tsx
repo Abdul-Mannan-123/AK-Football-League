@@ -7,6 +7,7 @@ import { useState } from "react";
 const links = [
   ["Matches", "/matches"],
   ["Tables", "/leagues"],
+  ["Stats", "/stats"],
   ["Players", "/players"],
   ["News", "/news"],
   ["Officials", "/referees"],
