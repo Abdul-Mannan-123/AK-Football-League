@@ -33,7 +33,7 @@ type DashboardProps = {
 };
 
 const navItems = [
-  { label: "Matches", href: "#match-center" },
+  { label: "Matches", href: "/matches" },
   { label: "Tables", href: "#tables" },
   { label: "Stats", href: "#stats" },
   { label: "Players", href: "/players" },
@@ -78,7 +78,7 @@ export function Dashboard({ standings, scorers, assists, news, featuredMatch, ma
       <div className="border-b border-white/10 bg-[#101722]">
         <div className="mx-auto flex max-w-7xl items-center gap-5 overflow-x-auto px-5 py-3 lg:px-8">
           <span className="flex shrink-0 items-center gap-2 text-xs font-black uppercase tracking-widest text-electric"><span className="h-2 w-2 animate-pulse rounded-full bg-electric" /> Match ticker</span>
-          {homepageMatches.length ? homepageMatches.slice(0, 4).map((match) => <Link href="#match-center" key={match.id} className="flex shrink-0 items-center gap-2 text-xs font-bold text-white/65 hover:text-white"><TeamBadge src={match.home.logo_url ?? "/players/default.png"} alt={match.home.short_code} className="h-5 w-5" />{match.home.short_code}<b className="text-white">{match.status === "scheduled" ? "—" : `${match.home_score} - ${match.away_score}`}</b>{match.away.short_code}<TeamBadge src={match.away.logo_url ?? "/players/default.png"} alt={match.away.short_code} className="h-5 w-5" /><span className={`rounded-full px-2 py-1 text-[10px] font-black ${match.status === "live" || match.status === "halftime" ? "bg-cyan text-ink" : match.status === "completed" ? "bg-white/10 text-white/50" : "bg-cyan/15 text-cyan"}`}>{match.status === "completed" ? "FT" : match.status === "live" ? "LIVE" : match.status === "halftime" ? "HT" : "UPCOMING"}</span></Link>) : <span className="text-xs text-white/45">No fixtures published yet.</span>}
+          {homepageMatches.length ? homepageMatches.slice(0, 4).map((match) => <Link href="/matches" key={match.id} className="flex shrink-0 items-center gap-2 text-xs font-bold text-white/65 hover:text-white"><TeamBadge src={match.home.logo_url ?? "/players/default.png"} alt={match.home.short_code} className="h-5 w-5" />{match.home.short_code}<b className="text-white">{match.status === "scheduled" ? "—" : `${match.home_score} - ${match.away_score}`}</b>{match.away.short_code}<TeamBadge src={match.away.logo_url ?? "/players/default.png"} alt={match.away.short_code} className="h-5 w-5" /><span className={`rounded-full px-2 py-1 text-[10px] font-black ${match.status === "live" || match.status === "halftime" ? "bg-cyan text-ink" : match.status === "completed" ? "bg-white/10 text-white/50" : "bg-cyan/15 text-cyan"}`}>{match.status === "completed" ? "FT" : match.status === "live" ? "LIVE" : match.status === "halftime" ? "HT" : "UPCOMING"}</span></Link>) : <span className="text-xs text-white/45">No fixtures published yet.</span>}
         </div>
       </div>
 
