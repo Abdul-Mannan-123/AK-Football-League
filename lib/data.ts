@@ -1,41 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import type { FeaturedMatch, HomepagePlayer, Leader, NewsItem, Standing, Team } from "@/lib/types";
-
-const demoTeams: Team[] = [1, 2, 3, 4, 5, 6].map((number) => ({
-  id: `team-${number}`,
-  name: ["AK United", "Northside FC", "Kabul Stars", "Pamir Athletic", "Capital City", "Herat Lions"][number - 1],
-  short_code: ["AKU", "NSF", "KBS", "PMA", "CAP", "HRL"][number - 1],
-  logo_url: `/teams/team_logo_${number}.jpeg`,
-}));
-
-export const demoStandings: Standing[] = demoTeams.map((team, index) => ({
-  ...team,
-  team_id: team.id,
-  team_name: team.name,
-  group_id: "group-a",
-  group_name: "Group A",
-  p: [7, 7, 7, 7, 7, 7][index],
-  w: [6, 5, 4, 3, 2, 1][index],
-  d: [1, 1, 1, 1, 2, 1][index],
-  l: [0, 1, 2, 3, 3, 5][index],
-  gd: [14, 9, 5, 1, -4, -12][index],
-  pts: [19, 16, 13, 10, 8, 4][index],
-}));
-
-const demoLeaders: Leader[] = [
-  { player_id: "p1", player_name: "Omid Ahmadi", photo_url: null, team_name: "AK United", short_code: "AKU", total_goals: 9 },
-  { player_id: "p2", player_name: "Farid Sadiq", photo_url: null, team_name: "Northside FC", short_code: "NSF", total_assists: 7 },
-];
-
-const demoNews: NewsItem[] = [
-  { id: "n1", title: "AK United make it six wins in a row", content: "A statement performance sends the league leaders clear at the top.", cover_image_url: null, published_at: "2026-10-05T18:00:00Z" },
-  { id: "n2", title: "The race for the top four heats up", content: "Just six points separate second from fifth as the league enters its decisive stretch.", cover_image_url: null, published_at: "2026-10-03T12:00:00Z" },
-  { id: "n3", title: "Meet the next generation of AKFL stars", content: "Young talent is making an impact across every group this season.", cover_image_url: null, published_at: "2026-09-30T08:00:00Z" },
-];
+import type { FeaturedMatch, HomepagePlayer } from "@/lib/types";
 
 export async function getHomepageData() {
   const supabase = await createClient();
-  if (!supabase) return { standings: demoStandings, scorers: [demoLeaders[0]], assists: [demoLeaders[1]], news: demoNews, featuredMatch: null, matches: [], players: [] };
+  if (!supabase) return { standings: [], scorers: [], assists: [], news: [], featuredMatch: null, matches: [], players: [] };
 
   const [standings, scorers, assists, news, matches, players, playerStats] = await Promise.all([
     supabase.from("league_standings").select("*").order("pts", { ascending: false }).order("gd", { ascending: false }),
@@ -89,10 +57,10 @@ export async function getHomepageData() {
     } satisfies HomepagePlayer;
   });
   return {
-    standings: standings.data?.length ? (standings.data as Standing[]) : demoStandings,
-    scorers: scorers.data?.length ? (scorers.data as Leader[]) : [demoLeaders[0]],
-    assists: assists.data?.length ? (assists.data as Leader[]) : [demoLeaders[1]],
-    news: news.data?.length ? (news.data as NewsItem[]) : demoNews,
+    standings: standings.data ?? [],
+    scorers: scorers.data ?? [],
+    assists: assists.data ?? [],
+    news: news.data ?? [],
     featuredMatch,
     matches: normalizedMatches.slice(0, 6),
     players: homepagePlayers,
