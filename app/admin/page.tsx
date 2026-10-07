@@ -52,6 +52,19 @@ export default async function AdminPage() {
       </header>
 
       <div className="admin-theme mx-auto grid max-w-7xl gap-8 px-5 py-8 lg:px-8">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+          <p className="text-xs font-black uppercase tracking-[0.25em] text-[#F59E0B]">Getting started</p>
+          <h2 className="mt-2 font-display text-2xl font-black text-[#002D72]">Build your league workspace</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-500">If the forms are empty, that is expected. Add your season and teams first, then players, groups, fixtures, staff roles, news, and match events.</p>
+          <div className="mt-5 grid gap-3 text-sm text-gray-600 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ["1", "Create season and teams", "League setup"],
+              ["2", "Add the roster", "Team workspace"],
+              ["3", "Schedule fixtures", "Fixture editor"],
+              ["4", "Publish updates", "News desk"],
+            ].map(([number, title, area]) => <div key={number} className="rounded-2xl border border-slate-200 bg-slate-50 p-4"><span className="font-display text-xl font-black text-[#0055A4]">{number}</span><p className="mt-2 font-bold text-[#002D72]">{title}</p><p className="mt-1 text-xs text-gray-500">{area}</p></div>)}
+          </div>
+        </section>
         {isAdmin && <section className="rounded-3xl border border-electric/20 bg-panel p-6 sm:p-8">
           <div className="mb-6">
             <p className="text-xs font-black uppercase tracking-[0.25em] text-electric">Administrator controls</p>

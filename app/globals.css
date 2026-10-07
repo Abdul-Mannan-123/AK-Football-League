@@ -125,6 +125,15 @@ body {
     border-color: #e2e8f0 !important;
     color: #1a1a1a !important;
   }
+  .admin-theme .bg-panel input::placeholder,
+  .admin-theme .bg-panel textarea::placeholder {
+    color: #94a3b8 !important;
+    opacity: 1;
+  }
+  .admin-theme .bg-panel select:invalid,
+  .admin-theme .bg-panel select option[value=""] {
+    color: #94a3b8;
+  }
   .admin-theme .bg-panel .bg-ink\/40,
   .admin-theme .bg-panel .bg-ink\/50,
   .admin-theme .bg-panel .bg-white\/5,
